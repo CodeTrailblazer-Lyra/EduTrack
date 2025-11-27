@@ -1,6 +1,5 @@
 package xyz.lukix.edutrack.controller;
 
-
 import org.springframework.web.bind.annotation.*;
 import xyz.lukix.edutrack.entity.Student;
 import xyz.lukix.edutrack.service.StuService;
@@ -9,7 +8,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/students")
-
 public class StuController {
 
     private final StuService stuService;
