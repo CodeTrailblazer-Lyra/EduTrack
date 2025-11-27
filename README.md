@@ -1,11 +1,11 @@
 # EduTrack 教育管理系统
 
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-green.svg)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.0-green.svg)
 ![Java](https://img.shields.io/badge/Java-21-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 
-EduTrack 是一个基于 Spring Boot 的教育管理系统，用于管理学生、教师、课程以及选课信息。该系统提供了完整的 CRUD 操作和 RESTful API 接口，并集成了 Swagger UI 用于 API 文档展示。
+EduTrack 是一个基于 Spring Boot 的教育管理系统，用于管理学生、教师、课程以及选课信息。该系统提供了完整的 CRUD 操作和 RESTful API 接口。
 
 ## 功能特性
 
@@ -14,16 +14,14 @@ EduTrack 是一个基于 Spring Boot 的教育管理系统，用于管理学生�
 - 课程信息管理（增删改查）
 - 选课记录管理
 - RESTful API 设计
-- API 文档自动生成（Swagger UI）
 - 数据库自动建表与更新
 
 ## 技术栈
 
-- **后端框架**: Spring Boot 3.2.0
+- **后端框架**: Spring Boot 4.0.0
 - **编程语言**: Java 21
 - **数据库**: PostgreSQL
 - **ORM 框架**: Spring Data JPA
-- **API 文档**: SpringDoc OpenAPI (Swagger UI)
 - **构建工具**: Maven
 - **其他**: Lombok, Spring Validation
 
@@ -36,6 +34,7 @@ controller (控制层) -> service (服务层) -> repository (数据访问层) ->
 ```
 
 主要实体包括：
+
 - Student (学生)
 - Teacher (教师)
 - Course (课程)
@@ -124,14 +123,13 @@ erDiagram
 项目启动后，可以通过以下地址访问：
 
 - 应用程序: http://localhost:8080
-- API 文档 (Swagger UI): http://localhost:8080/swagger-ui.html
-- API JSON 文档: http://localhost:8080/v3/api-docs
 
 ## API 接口说明
 
 系统提供以下主要 RESTful API 接口：
 
 ### 学生管理
+
 - `GET /students` - 获取所有学生
 - `GET /students/{id}` - 根据ID获取学生
 - `POST /students` - 创建学生
@@ -139,6 +137,7 @@ erDiagram
 - `DELETE /students/{id}` - 删除学生
 
 ### 教师管理
+
 - `GET /teachers` - 获取所有教师
 - `GET /teachers/{id}` - 根据ID获取教师
 - `POST /teachers` - 创建教师
@@ -146,6 +145,7 @@ erDiagram
 - `DELETE /teachers/{id}` - 删除教师
 
 ### 课程管理
+
 - `GET /courses` - 获取所有课程
 - `GET /courses/{id}` - 根据ID获取课程
 - `POST /courses` - 创建课程
