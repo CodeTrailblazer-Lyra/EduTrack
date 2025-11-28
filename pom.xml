@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>xyz.lukix</groupId>
-    <artifactId>edutrack</artifactId>
+    <artifactId>EduTrackServer</artifactId>
     <version>0.0.0</version>
     <name>EduTrack</name>
     <description>EduTrack</description>
