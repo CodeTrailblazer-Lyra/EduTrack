@@ -13,6 +13,7 @@ import xyz.lukix.edutrack.service.EnrollmentService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -31,17 +32,21 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
     
     @Override
-    public List<Enrollment> getAllEnrollments() {
-        return enrollmentRepository.findAll();
+    public List<EnrollmentDTO> getAllEnrollments() {
+        return enrollmentRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public Enrollment getEnrollmentById(Long id) {
-        return enrollmentRepository.findById(id).orElse(null);
+    public EnrollmentDTO getEnrollmentById(Long id) {
+        return enrollmentRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
     
     @Override
-    public Enrollment createEnrollment(EnrollmentDTO enrollmentDTO) {
+    public EnrollmentDTO createEnrollment(EnrollmentDTO enrollmentDTO) {
         // 检查学生和课程是否存在
         Optional<Student> studentOpt = studentRepository.findById(enrollmentDTO.getStudentId());
         Optional<Course> courseOpt = courseRepository.findById(enrollmentDTO.getCourseId());
@@ -66,11 +71,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         enrollment.setEnrolledAt(enrollmentDTO.getEnrolledAt() != null ? 
                 enrollmentDTO.getEnrolledAt() : LocalDateTime.now());
         
-        return enrollmentRepository.save(enrollment);
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        return convertToDTO(savedEnrollment);
     }
     
     @Override
-    public Enrollment updateEnrollment(Long id, EnrollmentDTO enrollmentDTO) {
+    public EnrollmentDTO updateEnrollment(Long id, EnrollmentDTO enrollmentDTO) {
         Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(id);
         if (enrollmentOpt.isEmpty()) {
             return null;
@@ -114,7 +120,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             enrollment.setEnrolledAt(enrollmentDTO.getEnrolledAt());
         }
         
-        return enrollmentRepository.save(enrollment);
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        return convertToDTO(savedEnrollment);
     }
     
     @Override
@@ -123,12 +130,37 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
     
     @Override
-    public List<Enrollment> getEnrollmentsByStudentId(Long studentId) {
-        return enrollmentRepository.findByStudentId(studentId);
+    public List<EnrollmentDTO> getEnrollmentsByStudentId(Long studentId) {
+        return enrollmentRepository.findByStudentId(studentId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Enrollment> getEnrollmentsByCourseId(Long courseId) {
-        return enrollmentRepository.findByCourseId(courseId);
+    public List<EnrollmentDTO> getEnrollmentsByCourseId(Long courseId) {
+        return enrollmentRepository.findByCourseId(courseId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * 将Enrollment实体转换为EnrollmentDTO
+     * @param enrollment Enrollment实体
+     * @return EnrollmentDTO
+     */
+    private EnrollmentDTO convertToDTO(Enrollment enrollment) {
+        EnrollmentDTO dto = new EnrollmentDTO();
+        dto.setId(enrollment.getId());
+        if (enrollment.getStudent() != null) {
+            dto.setStudentId(enrollment.getStudent().getId());
+        }
+        if (enrollment.getCourse() != null) {
+            dto.setCourseId(enrollment.getCourse().getId());
+        }
+        dto.setScore(enrollment.getScore());
+        dto.setSemester(enrollment.getSemester());
+        dto.setPassed(enrollment.getPassed());
+        dto.setEnrolledAt(enrollment.getEnrolledAt());
+        return dto;
     }
 }

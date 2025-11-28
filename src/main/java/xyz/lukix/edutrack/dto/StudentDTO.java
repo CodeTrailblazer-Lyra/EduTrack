@@ -5,10 +5,11 @@ import xyz.lukix.edutrack.util.XssCleaner;
 
 @Data
 public class StudentDTO {
-    private String stuNum;
-    private String name;
-    private String major;
-    
+    private Long id;
+    private String stuNum;   //学号
+    private String name;     //姓名
+    private String major;    //专业
+
     /**
      * 清理所有字段以防止XSS攻击
      */

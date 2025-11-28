@@ -2,53 +2,49 @@ package xyz.lukix.edutrack.service.impl;
 
 import org.springframework.stereotype.Service;
 import xyz.lukix.edutrack.entity.Course;
-import xyz.lukix.edutrack.entity.Teacher;
+import xyz.lukix.edutrack.dto.CourseDTO;
 import xyz.lukix.edutrack.repository.CourseRepository;
-import xyz.lukix.edutrack.repository.TeacherRepository;
 import xyz.lukix.edutrack.service.CourseService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseServiceImpl implements CourseService {
+    
     private final CourseRepository courseRepository;
-    private final TeacherRepository teacherRepository;
-
-    public CourseServiceImpl(CourseRepository courseRepository, TeacherRepository teacherRepository) {
+    
+    public CourseServiceImpl(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
-        this.teacherRepository = teacherRepository;
     }
-
+    
     @Override
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+    public List<CourseDTO> getAllCourses() {
+        return courseRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
-
+    
     @Override
-    public Course getCourseById(Long id) {
-        return courseRepository.findById(id).orElse(null);
+    public CourseDTO getCourseById(Long id) {
+        return courseRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
-
+    
     @Override
-    public Course createCourse(Course course) {
+    public CourseDTO createCourse(Course course) {
         // 检查课程代码是否已存在
         if (course.getLessonCode() != null && 
             courseRepository.existsByLessonCode(course.getLessonCode())) {
             throw new RuntimeException("课程代码已存在: " + course.getLessonCode());
         }
-        
-        // 如果设置了教师，验证教师是否存在
-        if (course.getTeacher() != null && course.getTeacher().getId() != null) {
-            Teacher teacher = teacherRepository.findById(course.getTeacher().getId())
-                    .orElseThrow(() -> new RuntimeException("教师不存在，ID: " + course.getTeacher().getId()));
-            course.setTeacher(teacher);
-        }
-        
-        return courseRepository.save(course);
+        Course savedCourse = courseRepository.save(course);
+        return convertToDTO(savedCourse);
     }
-
+    
     @Override
-    public Course updateCourse(Long id, Course course) {
+    public CourseDTO updateCourse(Long id, Course course) {
         if (courseRepository.existsById(id)) {
             // 检查课程代码是否已存在（排除自己）
             if (course.getLessonCode() != null && 
@@ -56,26 +52,39 @@ public class CourseServiceImpl implements CourseService {
                 throw new RuntimeException("课程代码已存在: " + course.getLessonCode());
             }
             
-            // 如果设置了教师，验证教师是否存在
-            if (course.getTeacher() != null && course.getTeacher().getId() != null) {
-                Teacher teacher = teacherRepository.findById(course.getTeacher().getId())
-                        .orElseThrow(() -> new RuntimeException("教师不存在，ID: " + course.getTeacher().getId()));
-                course.setTeacher(teacher);
-            }
-            
             course.setId(id);
-            return courseRepository.save(course);
+            Course savedCourse = courseRepository.save(course);
+            return convertToDTO(savedCourse);
         }
         return null;
     }
-
+    
     @Override
     public void deleteCourse(Long id) {
         courseRepository.deleteById(id);
     }
     
     @Override
-    public Course getCourseByLessonCode(String lessonCode) {
-        return courseRepository.findByLessonCode(lessonCode).orElse(null);
+    public CourseDTO getCourseByLessonCode(String lessonCode) {
+        return courseRepository.findByLessonCode(lessonCode)
+                .map(this::convertToDTO)
+                .orElse(null);
+    }
+    
+    /**
+     * 将Course实体转换为CourseDTO
+     * @param course Course实体
+     * @return CourseDTO
+     */
+    private CourseDTO convertToDTO(Course course) {
+        CourseDTO dto = new CourseDTO();
+        dto.setId(course.getId());
+        dto.setLessonCode(course.getLessonCode());
+        dto.setName(course.getName());
+        dto.setCredit(course.getCredit());
+        if (course.getTeacher() != null) {
+            dto.setTeacherId(course.getTeacher().getId());
+        }
+        return dto;
     }
 }

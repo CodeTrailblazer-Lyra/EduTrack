@@ -2,10 +2,12 @@ package xyz.lukix.edutrack.service.impl;
 
 import org.springframework.stereotype.Service;
 import xyz.lukix.edutrack.entity.Teacher;
+import xyz.lukix.edutrack.dto.TeacherDTO;
 import xyz.lukix.edutrack.repository.TeacherRepository;
 import xyz.lukix.edutrack.service.TeacherService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TeacherServiceImpl implements TeacherService {
@@ -16,27 +18,32 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    public List<Teacher> getAllTeachers() {
-        return teacherRepository.findAll();
+    public List<TeacherDTO> getAllTeachers() {
+        return teacherRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Teacher getTeacherById(Long id) {
-        return teacherRepository.findById(id).orElse(null);
+    public TeacherDTO getTeacherById(Long id) {
+        return teacherRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
 
     @Override
-    public Teacher createTeacher(Teacher teacher) {
+    public TeacherDTO createTeacher(Teacher teacher) {
         // 检查教职工号是否已存在
         if (teacher.getTeachNum() != null && 
             teacherRepository.existsByTeachNum(teacher.getTeachNum())) {
             throw new RuntimeException("教职工号已存在: " + teacher.getTeachNum());
         }
-        return teacherRepository.save(teacher);
+        Teacher savedTeacher = teacherRepository.save(teacher);
+        return convertToDTO(savedTeacher);
     }
 
     @Override
-    public Teacher updateTeacher(Long id, Teacher teacher) {
+    public TeacherDTO updateTeacher(Long id, Teacher teacher) {
         if (teacherRepository.existsById(id)) {
             // 检查教职工号是否已存在（排除自己）
             if (teacher.getTeachNum() != null && 
@@ -45,7 +52,8 @@ public class TeacherServiceImpl implements TeacherService {
             }
             
             teacher.setId(id);
-            return teacherRepository.save(teacher);
+            Teacher savedTeacher = teacherRepository.save(teacher);
+            return convertToDTO(savedTeacher);
         }
         return null;
     }
@@ -56,7 +64,22 @@ public class TeacherServiceImpl implements TeacherService {
     }
     
     @Override
-    public Teacher getTeacherByTeachNum(String teachNum) {
-        return teacherRepository.findByTeachNum(teachNum).orElse(null);
+    public TeacherDTO getTeacherByTeachNum(String teachNum) {
+        return teacherRepository.findByTeachNum(teachNum)
+                .map(this::convertToDTO)
+                .orElse(null);
+    }
+    
+    /**
+     * 将Teacher实体转换为TeacherDTO
+     * @param teacher Teacher实体
+     * @return TeacherDTO
+     */
+    private TeacherDTO convertToDTO(Teacher teacher) {
+        TeacherDTO dto = new TeacherDTO();
+        dto.setId(teacher.getId());
+        dto.setTeachNum(teacher.getTeachNum());
+        dto.setName(teacher.getName());
+        return dto;
     }
 }
