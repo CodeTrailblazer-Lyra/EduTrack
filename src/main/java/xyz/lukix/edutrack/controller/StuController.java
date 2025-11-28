@@ -45,4 +45,5 @@ public class StuController {
             @PathVariable("id") Long id) {
         stuService.deleteStu(id);
     }
+    
 }
