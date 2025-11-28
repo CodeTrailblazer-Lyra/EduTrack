@@ -30,7 +30,14 @@ public class XssCleaner {
                     .replaceAll("(?i)onmouseout", "")
                     .replaceAll("(?i)onsubmit", "")
                     .replaceAll("(?i)onfocus", "")
-                    .replaceAll("(?i)onblur", "");
+                    .replaceAll("(?i)onblur", "")
+                    .replaceAll("(?i)alert", "")
+                    .replaceAll("(?i)script", "")
+                    .replaceAll("(?i)img", "")
+                    .replaceAll("(?i)svg", "")
+                    .replaceAll("(?i)iframe", "")
+                    .replaceAll("(?i)embed", "")
+                    .replaceAll("(?i)object", "");
         
         return value;
     }

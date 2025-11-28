@@ -3,7 +3,6 @@ package xyz.lukix.edutrack.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.util.HtmlUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

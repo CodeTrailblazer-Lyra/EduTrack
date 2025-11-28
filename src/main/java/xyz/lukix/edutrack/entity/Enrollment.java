@@ -51,7 +51,7 @@ public class Enrollment {
     /**
      * 清理所有字段以防止XSS攻击
      */
-    private void cleanXss() {
+    public void cleanXss() {
         if (this.semester != null) {
             this.semester = XssCleaner.clean(this.semester);
         }

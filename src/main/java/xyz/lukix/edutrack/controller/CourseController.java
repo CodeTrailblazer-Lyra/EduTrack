@@ -31,7 +31,7 @@ public class CourseController {
         if (course != null) {
             return ResponseEntity.ok(ApiResponse.success(course));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Course not found with id: " + id));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Course not found with id: " + escapeHtml(id.toString())));
         }
     }
     
@@ -44,7 +44,7 @@ public class CourseController {
         if (course != null) {
             return ResponseEntity.ok(ApiResponse.success(course));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Course not found with code: " + cleanLessonCode));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Course not found with code: " + escapeHtml(cleanLessonCode)));
         }
     }
 
@@ -58,7 +58,7 @@ public class CourseController {
             Course createdCourse = courseService.createCourse(course);
             return ResponseEntity.status(201).body(ApiResponse.success("Course created successfully", createdCourse));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
         }
     }
 
@@ -74,10 +74,10 @@ public class CourseController {
             if (updatedCourse != null) {
                 return ResponseEntity.ok(ApiResponse.success("Course updated successfully", updatedCourse));
             } else {
-                return ResponseEntity.status(404).body(ApiResponse.notFound("Course not found with id: " + id));
+                return ResponseEntity.status(404).body(ApiResponse.notFound("Course not found with id: " + escapeHtml(id.toString())));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
         }
     }
 
@@ -89,7 +89,23 @@ public class CourseController {
             courseService.deleteCourse(id);
             return ResponseEntity.ok(ApiResponse.success("Course deleted successfully"));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Course not found with id: " + id));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Course not found with id: " + escapeHtml(id.toString())));
         }
+    }
+    
+    /**
+     * HTML转义函数，防止XSS攻击
+     * @param value 需要转义的字符串
+     * @return 转义后的字符串
+     */
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#x27;");
     }
 }

@@ -27,7 +27,7 @@ EduTrack 是一个基于 Spring Boot 的教育管理系统，用于管理学生�
 - **数据库**: PostgreSQL
 - **ORM 框架**: Spring Data JPA
 - **构建工具**: Maven
-- **安全防护**: Apache Commons Text, 自定义XSS过滤器
+- **安全防护**: Apache Commons Text, 自定义XSS过滤器, HTML转义
 - **其他**: Lombok, Spring Validation
 
 ## 系统架构
@@ -138,7 +138,8 @@ erDiagram
 2. **实体层防护**：在实体类中使用@PrePersist和@PreUpdate注解，在数据持久化前自动清理
 3. **传输层防护**：在DTO对象中提供cleanXss()方法，在数据传输过程中主动清理
 4. **控制层防护**：在控制器中对路径变量和请求体进行二次验证和清理
-5. **工具类防护**：使用Apache Commons Text进行HTML转义，并增强过滤常见攻击向量
+5. **响应层防护**：在错误消息中使用HTML转义，防止恶意数据通过错误响应注入
+6. **工具类防护**：使用Apache Commons Text进行HTML转义，并增强过滤常见攻击向量
 
 ### SQL注入防护
 系统通过以下方式防止SQL注入攻击：

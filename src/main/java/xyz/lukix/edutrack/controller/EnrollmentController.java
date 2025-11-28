@@ -31,7 +31,7 @@ public class EnrollmentController {
         if (enrollment != null) {
             return ResponseEntity.ok(ApiResponse.success(enrollment));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + id));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + escapeHtml(id.toString())));
         }
     }
     
@@ -48,7 +48,7 @@ public class EnrollmentController {
                 return ResponseEntity.status(400).body(ApiResponse.badRequest("Invalid student or course information"));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
         }
     }
     
@@ -64,10 +64,10 @@ public class EnrollmentController {
             if (enrollment != null) {
                 return ResponseEntity.ok(ApiResponse.success("Enrollment record updated successfully", enrollment));
             } else {
-                return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + id));
+                return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + escapeHtml(id.toString())));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
         }
     }
     
@@ -78,7 +78,7 @@ public class EnrollmentController {
             enrollmentService.deleteEnrollment(id);
             return ResponseEntity.ok(ApiResponse.success("Enrollment record deleted successfully"));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + id));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + escapeHtml(id.toString())));
         }
     }
     
@@ -92,5 +92,21 @@ public class EnrollmentController {
     public ResponseEntity<ApiResponse<List<Enrollment>>> getEnrollmentsByCourseId(@PathVariable("courseId") Long courseId) {
         List<Enrollment> enrollments = enrollmentService.getEnrollmentsByCourseId(courseId);
         return ResponseEntity.ok(ApiResponse.success(enrollments));
+    }
+    
+    /**
+     * HTML转义函数，防止XSS攻击
+     * @param value 需要转义的字符串
+     * @return 转义后的字符串
+     */
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#x27;");
     }
 }

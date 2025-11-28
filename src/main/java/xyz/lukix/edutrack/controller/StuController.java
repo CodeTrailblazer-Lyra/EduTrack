@@ -31,7 +31,7 @@ public class StuController {
         if (student != null) {
             return ResponseEntity.ok(ApiResponse.success(student));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + id));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + escapeHtml(id.toString())));
         }
     }
     
@@ -44,7 +44,7 @@ public class StuController {
         if (student != null) {
             return ResponseEntity.ok(ApiResponse.success(student));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with student number: " + cleanStuNum));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with student number: " + escapeHtml(cleanStuNum)));
         }
     }
 
@@ -58,7 +58,7 @@ public class StuController {
             Student createdStudent = stuService.createStu(student);
             return ResponseEntity.status(201).body(ApiResponse.success("Student created successfully", createdStudent));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
         }
     }
 
@@ -74,10 +74,10 @@ public class StuController {
             if (updatedStudent != null) {
                 return ResponseEntity.ok(ApiResponse.success("Student updated successfully", updatedStudent));
             } else {
-                return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + id));
+                return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + escapeHtml(id.toString())));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
         }
     }
 
@@ -89,7 +89,23 @@ public class StuController {
             stuService.deleteStu(id);
             return ResponseEntity.ok(ApiResponse.success("Student deleted successfully"));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + id));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + escapeHtml(id.toString())));
         }
+    }
+    
+    /**
+     * HTML转义函数，防止XSS攻击
+     * @param value 需要转义的字符串
+     * @return 转义后的字符串
+     */
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#x27;");
     }
 }
