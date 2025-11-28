@@ -1,24 +1,36 @@
-name: Build and Release
+name: Build & Release
 
 on:
   push:
     tags:
       - '*'
 
-permissions:
-  contents: write
-
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Build
-        run: |
-          mvn -B package
+    permissions:
+      contents: write   # 必须，否则不能创建 release
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ./target/*.jar
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: |
+            target/*.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
