@@ -10,7 +10,7 @@
     </parent>
     <groupId>xyz.lukix</groupId>
     <artifactId>EduTrack</artifactId>
-    <version>v0.1.3</version>
+    <version>0.1.4</version>
     <name>EduTrack</name>
     <description>EduTrack</description>
     <properties>
