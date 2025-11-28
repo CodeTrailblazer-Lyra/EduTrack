@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import xyz.lukix.edutrack.util.XssCleaner;
 
 import java.time.LocalDateTime;
 
@@ -29,4 +30,30 @@ public class Enrollment {
     private String semester;            // 如 "2025-1"
     private Boolean passed;             // 是否通过
     private LocalDateTime enrolledAt;   // 选课时间
+    
+    /**
+     * 在创建时设置时间并清理XSS
+     */
+    @PrePersist
+    protected void onCreate() {
+        enrolledAt = LocalDateTime.now();
+        cleanXss();
+    }
+    
+    /**
+     * 在更新时清理XSS
+     */
+    @PreUpdate
+    public void onUpdate() {
+        cleanXss();
+    }
+    
+    /**
+     * 清理所有字段以防止XSS攻击
+     */
+    private void cleanXss() {
+        if (this.semester != null) {
+            this.semester = XssCleaner.clean(this.semester);
+        }
+    }
 }

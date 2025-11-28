@@ -19,4 +19,7 @@ public interface TeacherService {
 
     //删除教师
     void deleteTeacher(Long id);
+    
+    //根据教职工号查询教师
+    Teacher getTeacherByTeachNum(String teachNum);
 }

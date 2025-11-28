@@ -19,4 +19,7 @@ public interface StuService {
 
     //删除学生
     void deleteStu(Long id);
+    
+    //根据学号查询学生
+    Student getStuByStuNum(String stuNum);
 }

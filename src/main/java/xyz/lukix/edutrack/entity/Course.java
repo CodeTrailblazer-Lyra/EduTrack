@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import xyz.lukix.edutrack.util.XssCleaner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,20 @@ public class Course {
     private Teacher teacher;
 
     // 该课程被多个学生选
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Enrollment> enrollments = new ArrayList<>();
+    
+    /**
+     * 清理所有字段以防止XSS攻击
+     */
+    @PrePersist
+    @PreUpdate
+    public void cleanXss() {
+        if (this.lessonCode != null) {
+            this.lessonCode = XssCleaner.clean(this.lessonCode);
+        }
+        if (this.name != null) {
+            this.name = XssCleaner.clean(this.name);
+        }
+    }
 }

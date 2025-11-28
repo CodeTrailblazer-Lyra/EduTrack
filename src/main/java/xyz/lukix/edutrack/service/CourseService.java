@@ -19,4 +19,7 @@ public interface CourseService {
 
     //删除课程
     void deleteCourse(Long id);
+    
+    //根据课程代码查询课程
+    Course getCourseByLessonCode(String lessonCode);
 }

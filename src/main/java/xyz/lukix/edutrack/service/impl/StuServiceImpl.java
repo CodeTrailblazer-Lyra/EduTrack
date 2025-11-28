@@ -27,13 +27,24 @@ public class StuServiceImpl implements StuService {
 
     @Override
     public Student createStu(Student student) {
+        // 检查学号是否已存在
+        if (student.getStuNum() != null && 
+            studentRepository.existsByStuNum(student.getStuNum())) {
+            throw new RuntimeException("学号已存在: " + student.getStuNum());
+        }
         return studentRepository.save(student);
     }
 
     @Override
     public Student updateStu(Long id, Student student) {
         if (studentRepository.existsById(id)) {
-            student.setId(id);  // 使用Lombok生成的setId方法
+            // 检查学号是否已存在（排除自己）
+            if (student.getStuNum() != null && 
+                studentRepository.existsByStuNumAndIdNot(student.getStuNum(), id)) {
+                throw new RuntimeException("学号已存在: " + student.getStuNum());
+            }
+            
+            student.setId(id);
             return studentRepository.save(student);
         }
         return null;
@@ -42,5 +53,10 @@ public class StuServiceImpl implements StuService {
     @Override
     public void deleteStu(Long id) {
         studentRepository.deleteById(id);
+    }
+    
+    @Override
+    public Student getStuByStuNum(String stuNum) {
+        return studentRepository.findByStuNum(stuNum).orElse(null);
     }
 }

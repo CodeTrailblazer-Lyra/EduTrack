@@ -27,13 +27,24 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Override
     public Teacher createTeacher(Teacher teacher) {
+        // 检查教职工号是否已存在
+        if (teacher.getTeachNum() != null && 
+            teacherRepository.existsByTeachNum(teacher.getTeachNum())) {
+            throw new RuntimeException("教职工号已存在: " + teacher.getTeachNum());
+        }
         return teacherRepository.save(teacher);
     }
 
     @Override
     public Teacher updateTeacher(Long id, Teacher teacher) {
         if (teacherRepository.existsById(id)) {
-            teacher.setId(id);  // 使用Lombok生成的setId方法
+            // 检查教职工号是否已存在（排除自己）
+            if (teacher.getTeachNum() != null && 
+                teacherRepository.existsByTeachNumAndIdNot(teacher.getTeachNum(), id)) {
+                throw new RuntimeException("教职工号已存在: " + teacher.getTeachNum());
+            }
+            
+            teacher.setId(id);
             return teacherRepository.save(teacher);
         }
         return null;
@@ -42,5 +53,10 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public void deleteTeacher(Long id) {
         teacherRepository.deleteById(id);
+    }
+    
+    @Override
+    public Teacher getTeacherByTeachNum(String teachNum) {
+        return teacherRepository.findByTeachNum(teachNum).orElse(null);
     }
 }
