@@ -1,5 +1,11 @@
 package xyz.lukix.edutrack.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.lukix.edutrack.entity.Teacher;
@@ -11,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/teachers")
+@Tag(name = "教师管理", description = "教师相关操作API")
 public class TeacherController {
     
     private final TeacherService teacherService;
@@ -20,14 +27,28 @@ public class TeacherController {
     }
 
     @GetMapping
+    @Operation(summary = "获取所有教师", description = "返回系统中所有教师的列表")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功获取教师列表",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TeacherDTO.class))})
+    })
     public ResponseEntity<ApiResponse<List<TeacherDTO>>> getAllTeachers() {
         List<TeacherDTO> teachers = teacherService.getAllTeachers();
         return ResponseEntity.ok(ApiResponse.success(teachers));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "根据ID获取教师", description = "根据教师ID返回特定教师的信息")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功获取教师信息",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TeacherDTO.class))}),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "教师未找到",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<TeacherDTO>> getTeacherById(
-            @PathVariable("id") Long id) {
+            @Parameter(description = "教师ID") @PathVariable("id") Long id) {
         TeacherDTO teacher = teacherService.getTeacherById(id);
         if (teacher != null) {
             return ResponseEntity.ok(ApiResponse.success(teacher));
@@ -37,8 +58,16 @@ public class TeacherController {
     }
     
     @GetMapping("/num/{teachNum}")
+    @Operation(summary = "根据教职工号获取教师", description = "根据教师教职工号返回特定教师的信息")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功获取教师信息",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TeacherDTO.class))}),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "教师未找到",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<TeacherDTO>> getTeacherByTeachNum(
-            @PathVariable("teachNum") String teachNum) {
+            @Parameter(description = "教师教职工号") @PathVariable("teachNum") String teachNum) {
         // 路径变量现在通过过滤器自动清理，但仍保持显式清理以确保双重保护
         String cleanTeachNum = xyz.lukix.edutrack.util.XssCleaner.clean(teachNum);
         TeacherDTO teacher = teacherService.getTeacherByTeachNum(cleanTeachNum);
@@ -50,6 +79,15 @@ public class TeacherController {
     }
 
     @PostMapping
+    @Operation(summary = "创建教师", description = "创建一个新的教师记录")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "教师信息")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "教师创建成功",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TeacherDTO.class))}),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "教职工号已存在",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<TeacherDTO>> createTeacher(
             @RequestBody Teacher teacher) {
         // 实体中的@PrePersist和@PreUpdate注解会自动清理，这里额外调用以确保安全
@@ -64,9 +102,19 @@ public class TeacherController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "更新教师", description = "更新指定ID的教师记录")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "教师更新成功",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TeacherDTO.class))}),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "教师未找到",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "教职工号已存在",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<TeacherDTO>> updateTeacher(
-            @PathVariable("id") Long id,
-            @RequestBody Teacher teacher) {
+            @Parameter(description = "教师ID") @PathVariable("id") Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "教师信息") @RequestBody Teacher teacher) {
         // 实体中的@PrePersist和@PreUpdate注解会自动清理，这里额外调用以确保安全
         teacher.cleanXss();
         
@@ -83,8 +131,14 @@ public class TeacherController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "删除教师", description = "删除指定ID的教师记录")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "教师删除成功"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "教师未找到",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<String>> deleteTeacher(
-            @PathVariable("id") Long id) {
+            @Parameter(description = "教师ID") @PathVariable("id") Long id) {
         TeacherDTO teacher = teacherService.getTeacherById(id);
         if (teacher != null) {
             teacherService.deleteTeacher(id);

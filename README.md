@@ -19,6 +19,7 @@ EduTrack 是一个基于 Spring Boot 的教育管理系统，用于管理学生�
 - 关联查询（按学生/课程查询选课记录）
 - 统一响应状态码和格式
 - 多层次XSS攻击防护
+- Swagger API 文档和测试界面
 
 ## 技术栈
 
@@ -27,6 +28,7 @@ EduTrack 是一个基于 Spring Boot 的教育管理系统，用于管理学生�
 - **数据库**: PostgreSQL
 - **ORM 框架**: Spring Data JPA
 - **构建工具**: Maven
+- **API 文档**: SpringDoc OpenAPI (Swagger)
 - **安全防护**: Apache Commons Text, 自定义XSS过滤器, HTML转义
 - **其他**: Lombok, Spring Validation
 
@@ -128,6 +130,8 @@ erDiagram
 项目启动后，可以通过以下地址访问：
 
 - 应用程序: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- API 文档(JSON格式): http://localhost:8080/v3/api-docs
 
 ## 安全特性
 
@@ -207,6 +211,29 @@ erDiagram
 - `POST /enrollments` - 创建选课记录
 - `PUT /enrollments/{id}` - 更新选课记录
 - `DELETE /enrollments/{id}` - 删除选课记录
+
+## API 测试
+
+本项目集成了 Swagger UI，提供交互式的 API 文档和测试界面。
+
+### 访问 Swagger UI
+
+启动项目后，可以通过以下地址访问 Swagger UI：
+
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- API 文档(JSON格式): http://localhost:8080/v3/api-docs
+
+### 使用说明
+
+1. 打开 Swagger UI 界面
+2. 展开需要测试的 API 分组（如学生管理、教师管理等）
+3. 点击具体的 API 接口查看详细信息
+4. 点击 "Try it out" 按钮开始测试
+5. 输入必要的参数
+6. 点击 "Execute" 执行请求
+7. 查看响应结果
+
+通过 Swagger UI，您可以方便地测试所有 API 接口，查看请求和响应格式，并实时了解 API 的工作状态。
 
 ## 开发指南
 

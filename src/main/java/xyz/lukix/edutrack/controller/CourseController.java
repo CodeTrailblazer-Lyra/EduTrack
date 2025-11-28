@@ -1,5 +1,11 @@
 package xyz.lukix.edutrack.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.lukix.edutrack.entity.Course;
@@ -11,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/courses")
+@Tag(name = "课程管理", description = "课程相关操作API")
 public class CourseController {
     
     private final CourseService courseService;
@@ -20,14 +27,28 @@ public class CourseController {
     }
 
     @GetMapping
+    @Operation(summary = "获取所有课程", description = "返回系统中所有课程的列表")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功获取课程列表",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CourseDTO.class))})
+    })
     public ResponseEntity<ApiResponse<List<CourseDTO>>> getAllCourses() {
         List<CourseDTO> courses = courseService.getAllCourses();
         return ResponseEntity.ok(ApiResponse.success(courses));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "根据ID获取课程", description = "根据课程ID返回特定课程的信息")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功获取课程信息",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CourseDTO.class))}),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "课程未找到",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<CourseDTO>> getCourseById(
-            @PathVariable("id") Long id) {
+            @Parameter(description = "课程ID") @PathVariable("id") Long id) {
         CourseDTO course = courseService.getCourseById(id);
         if (course != null) {
             return ResponseEntity.ok(ApiResponse.success(course));
@@ -37,8 +58,16 @@ public class CourseController {
     }
     
     @GetMapping("/code/{lessonCode}")
+    @Operation(summary = "根据课程代码获取课程", description = "根据课程代码返回特定课程的信息")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功获取课程信息",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CourseDTO.class))}),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "课程未找到",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<CourseDTO>> getCourseByLessonCode(
-            @PathVariable("lessonCode") String lessonCode) {
+            @Parameter(description = "课程代码") @PathVariable("lessonCode") String lessonCode) {
         // 路径变量现在通过过滤器自动清理，但仍保持显式清理以确保双重保护
         String cleanLessonCode = xyz.lukix.edutrack.util.XssCleaner.clean(lessonCode);
         CourseDTO course = courseService.getCourseByLessonCode(cleanLessonCode);
@@ -50,6 +79,15 @@ public class CourseController {
     }
 
     @PostMapping
+    @Operation(summary = "创建课程", description = "创建一个新的课程记录")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "课程信息")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "课程创建成功",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CourseDTO.class))}),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "课程代码已存在",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<CourseDTO>> createCourse(
             @RequestBody Course course) {
         // 实体中的@PrePersist和@PreUpdate注解会自动清理，这里额外调用以确保安全
@@ -64,9 +102,19 @@ public class CourseController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "更新课程", description = "更新指定ID的课程记录")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "课程更新成功",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CourseDTO.class))}),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "课程未找到",
+                    content = @Content),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "课程代码已存在",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<CourseDTO>> updateCourse(
-            @PathVariable("id") Long id,
-            @RequestBody Course course) {
+            @Parameter(description = "课程ID") @PathVariable("id") Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "课程信息") @RequestBody Course course) {
         // 实体中的@PrePersist和@PreUpdate注解会自动清理，这里额外调用以确保安全
         course.cleanXss();
         
@@ -83,8 +131,14 @@ public class CourseController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "删除课程", description = "删除指定ID的课程记录")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "课程删除成功"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "课程未找到",
+                    content = @Content)
+    })
     public ResponseEntity<ApiResponse<String>> deleteCourse(
-            @PathVariable("id") Long id) {
+            @Parameter(description = "课程ID") @PathVariable("id") Long id) {
         CourseDTO course = courseService.getCourseById(id);
         if (course != null) {
             courseService.deleteCourse(id);
