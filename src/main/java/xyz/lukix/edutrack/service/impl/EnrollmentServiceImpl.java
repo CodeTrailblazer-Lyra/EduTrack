@@ -2,17 +2,16 @@ package xyz.lukix.edutrack.service.impl;
 
 import org.springframework.stereotype.Service;
 import xyz.lukix.edutrack.dto.EnrollmentDTO;
+import xyz.lukix.edutrack.entity.Course;
 import xyz.lukix.edutrack.entity.Enrollment;
 import xyz.lukix.edutrack.entity.Student;
-import xyz.lukix.edutrack.entity.Course;
+import xyz.lukix.edutrack.repository.CourseRepository;
 import xyz.lukix.edutrack.repository.EnrollmentRepository;
 import xyz.lukix.edutrack.repository.StudentRepository;
-import xyz.lukix.edutrack.repository.CourseRepository;
 import xyz.lukix.edutrack.service.EnrollmentService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,18 +39,17 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     
     @Override
     public EnrollmentDTO getEnrollmentById(Long id) {
-        return enrollmentRepository.findById(id)
-                .map(this::convertToDTO)
-                .orElse(null);
+        Enrollment enrollment = enrollmentRepository.findById(id);
+        return enrollment != null ? convertToDTO(enrollment) : null;
     }
     
     @Override
     public EnrollmentDTO createEnrollment(EnrollmentDTO enrollmentDTO) {
         // 检查学生和课程是否存在
-        Optional<Student> studentOpt = studentRepository.findById(enrollmentDTO.getStudentId());
-        Optional<Course> courseOpt = courseRepository.findById(enrollmentDTO.getCourseId());
+        Student student = studentRepository.findById(enrollmentDTO.getStudentId()).orElse(null);
+        Course course = courseRepository.findById(enrollmentDTO.getCourseId()).orElse(null);
         
-        if (studentOpt.isEmpty() || courseOpt.isEmpty()) {
+        if (student == null || course == null) {
             return null;
         }
         
@@ -63,44 +61,42 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
         
         Enrollment enrollment = new Enrollment();
-        enrollment.setStudent(studentOpt.get());
-        enrollment.setCourse(courseOpt.get());
+        enrollment.setStudent(student);
+        enrollment.setCourse(course);
         enrollment.setScore(enrollmentDTO.getScore());
         enrollment.setSemester(enrollmentDTO.getSemester());
         enrollment.setPassed(enrollmentDTO.getPassed());
         enrollment.setEnrolledAt(enrollmentDTO.getEnrolledAt() != null ? 
                 enrollmentDTO.getEnrolledAt() : LocalDateTime.now());
         
-        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
-        return convertToDTO(savedEnrollment);
+        enrollmentRepository.insert(enrollment);
+        return convertToDTO(enrollment);
     }
     
     @Override
     public EnrollmentDTO updateEnrollment(Long id, EnrollmentDTO enrollmentDTO) {
-        Optional<Enrollment> enrollmentOpt = enrollmentRepository.findById(id);
-        if (enrollmentOpt.isEmpty()) {
+        Enrollment enrollment = enrollmentRepository.findById(id);
+        if (enrollment == null) {
             return null;
         }
-        
-        Enrollment enrollment = enrollmentOpt.get();
         
         // 如果要更新学生或课程，需要检查是否存在
         if (enrollmentDTO.getStudentId() != null && 
             !enrollmentDTO.getStudentId().equals(enrollment.getStudent().getId())) {
-            Optional<Student> studentOpt = studentRepository.findById(enrollmentDTO.getStudentId());
-            if (studentOpt.isEmpty()) {
+            Student student = studentRepository.findById(enrollmentDTO.getStudentId()).orElse(null);
+            if (student == null) {
                 throw new RuntimeException("学生不存在，ID: " + enrollmentDTO.getStudentId());
             }
-            enrollment.setStudent(studentOpt.get());
+            enrollment.setStudent(student);
         }
         
         if (enrollmentDTO.getCourseId() != null && 
             !enrollmentDTO.getCourseId().equals(enrollment.getCourse().getId())) {
-            Optional<Course> courseOpt = courseRepository.findById(enrollmentDTO.getCourseId());
-            if (courseOpt.isEmpty()) {
+            Course course = courseRepository.findById(enrollmentDTO.getCourseId()).orElse(null);
+            if (course == null) {
                 throw new RuntimeException("课程不存在，ID: " + enrollmentDTO.getCourseId());
             }
-            enrollment.setCourse(courseOpt.get());
+            enrollment.setCourse(course);
         }
         
         // 更新其他字段
@@ -120,8 +116,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             enrollment.setEnrolledAt(enrollmentDTO.getEnrolledAt());
         }
         
-        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
-        return convertToDTO(savedEnrollment);
+        enrollmentRepository.update(enrollment);
+        return convertToDTO(enrollment);
     }
     
     @Override

@@ -1,8 +1,8 @@
 package xyz.lukix.edutrack.service.impl;
 
 import org.springframework.stereotype.Service;
-import xyz.lukix.edutrack.entity.Course;
 import xyz.lukix.edutrack.dto.CourseDTO;
+import xyz.lukix.edutrack.entity.Course;
 import xyz.lukix.edutrack.repository.CourseRepository;
 import xyz.lukix.edutrack.service.CourseService;
 
@@ -39,8 +39,8 @@ public class CourseServiceImpl implements CourseService {
             courseRepository.existsByLessonCode(course.getLessonCode())) {
             throw new RuntimeException("课程代码已存在: " + course.getLessonCode());
         }
-        Course savedCourse = courseRepository.save(course);
-        return convertToDTO(savedCourse);
+        courseRepository.insert(course);
+        return convertToDTO(course);
     }
     
     @Override
@@ -53,8 +53,8 @@ public class CourseServiceImpl implements CourseService {
             }
             
             course.setId(id);
-            Course savedCourse = courseRepository.save(course);
-            return convertToDTO(savedCourse);
+            courseRepository.update(course);
+            return convertToDTO(course);
         }
         return null;
     }

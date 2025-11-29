@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import xyz.lukix.edutrack.entity.Teacher;
 import xyz.lukix.edutrack.dto.TeacherDTO;
+import xyz.lukix.edutrack.entity.Teacher;
 import xyz.lukix.edutrack.service.TeacherService;
 import xyz.lukix.edutrack.util.ApiResponse;
 
@@ -53,7 +53,7 @@ public class TeacherController {
         if (teacher != null) {
             return ResponseEntity.ok(ApiResponse.success(teacher));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Teacher not found with id: " + escapeHtml(id.toString())));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Teacher not found with id: " + id.toString()));
         }
     }
     
@@ -68,13 +68,11 @@ public class TeacherController {
     })
     public ResponseEntity<ApiResponse<TeacherDTO>> getTeacherByTeachNum(
             @Parameter(description = "教师教职工号") @PathVariable("teachNum") String teachNum) {
-        // 路径变量现在通过过滤器自动清理，但仍保持显式清理以确保双重保护
-        String cleanTeachNum = xyz.lukix.edutrack.util.XssCleaner.clean(teachNum);
-        TeacherDTO teacher = teacherService.getTeacherByTeachNum(cleanTeachNum);
+        TeacherDTO teacher = teacherService.getTeacherByTeachNum(teachNum);
         if (teacher != null) {
             return ResponseEntity.ok(ApiResponse.success(teacher));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Teacher not found with employee number: " + escapeHtml(cleanTeachNum)));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Teacher not found with employee number: " + teachNum));
         }
     }
 
@@ -90,14 +88,11 @@ public class TeacherController {
     })
     public ResponseEntity<ApiResponse<TeacherDTO>> createTeacher(
             @RequestBody Teacher teacher) {
-        // 实体中的@PrePersist和@PreUpdate注解会自动清理，这里额外调用以确保安全
-        teacher.cleanXss();
-        
         try {
             TeacherDTO createdTeacher = teacherService.createTeacher(teacher);
             return ResponseEntity.status(201).body(ApiResponse.success("Teacher created successfully", createdTeacher));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
         }
     }
 
@@ -115,18 +110,15 @@ public class TeacherController {
     public ResponseEntity<ApiResponse<TeacherDTO>> updateTeacher(
             @Parameter(description = "教师ID") @PathVariable("id") Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "教师信息") @RequestBody Teacher teacher) {
-        // 实体中的@PrePersist和@PreUpdate注解会自动清理，这里额外调用以确保安全
-        teacher.cleanXss();
-        
         try {
             TeacherDTO updatedTeacher = teacherService.updateTeacher(id, teacher);
             if (updatedTeacher != null) {
                 return ResponseEntity.ok(ApiResponse.success("Teacher updated successfully", updatedTeacher));
             } else {
-                return ResponseEntity.status(404).body(ApiResponse.notFound("Teacher not found with id: " + escapeHtml(id.toString())));
+                return ResponseEntity.status(404).body(ApiResponse.notFound("Teacher not found with id: " + id.toString()));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
         }
     }
 
@@ -144,23 +136,7 @@ public class TeacherController {
             teacherService.deleteTeacher(id);
             return ResponseEntity.ok(ApiResponse.success("Teacher deleted successfully"));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Teacher not found with id: " + escapeHtml(id.toString())));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Teacher not found with id: " + id.toString()));
         }
-    }
-    
-    /**
-     * HTML转义函数，防止XSS攻击
-     * @param value 需要转义的字符串
-     * @return 转义后的字符串
-     */
-    private String escapeHtml(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#x27;");
     }
 }

@@ -52,7 +52,7 @@ public class EnrollmentController {
         if (enrollment != null) {
             return ResponseEntity.ok(ApiResponse.success(enrollment));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + escapeHtml(id.toString())));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + id.toString()));
         }
     }
     
@@ -70,9 +70,6 @@ public class EnrollmentController {
     })
     public ResponseEntity<ApiResponse<EnrollmentDTO>> createEnrollment(
             @RequestBody EnrollmentDTO enrollmentDTO) {
-        // DTO中的cleanXss方法会清理数据
-        enrollmentDTO.cleanXss();
-        
         try {
             EnrollmentDTO enrollment = enrollmentService.createEnrollment(enrollmentDTO);
             if (enrollment != null) {
@@ -81,7 +78,7 @@ public class EnrollmentController {
                 return ResponseEntity.status(400).body(ApiResponse.badRequest("Invalid student or course information"));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
         }
     }
     
@@ -99,18 +96,15 @@ public class EnrollmentController {
     public ResponseEntity<ApiResponse<EnrollmentDTO>> updateEnrollment(
             @Parameter(description = "选课记录ID") @PathVariable("id") Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "选课记录信息") @RequestBody EnrollmentDTO enrollmentDTO) {
-        // DTO中的cleanXss方法会清理数据
-        enrollmentDTO.cleanXss();
-        
         try {
             EnrollmentDTO enrollment = enrollmentService.updateEnrollment(id, enrollmentDTO);
             if (enrollment != null) {
                 return ResponseEntity.ok(ApiResponse.success("Enrollment record updated successfully", enrollment));
             } else {
-                return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + escapeHtml(id.toString())));
+                return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + id.toString()));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
         }
     }
     
@@ -128,7 +122,7 @@ public class EnrollmentController {
             enrollmentService.deleteEnrollment(id);
             return ResponseEntity.ok(ApiResponse.success("Enrollment record deleted successfully"));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + escapeHtml(id.toString())));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Enrollment record not found with id: " + id.toString()));
         }
     }
     
@@ -156,21 +150,5 @@ public class EnrollmentController {
             @Parameter(description = "课程ID") @PathVariable("courseId") Long courseId) {
         List<EnrollmentDTO> enrollments = enrollmentService.getEnrollmentsByCourseId(courseId);
         return ResponseEntity.ok(ApiResponse.success(enrollments));
-    }
-    
-    /**
-     * HTML转义函数，防止XSS攻击
-     * @param value 需要转义的字符串
-     * @return 转义后的字符串
-     */
-    private String escapeHtml(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#x27;");
     }
 }

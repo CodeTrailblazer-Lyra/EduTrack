@@ -3,10 +3,14 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/edutrack
-    username: lyra
-    password: "@19172366630Zhou"
+    url: jdbc:postgresql://8.148.67.170:5432/postgres
+    username: user_MAC5WE
+    password: "password_2TyHhc"
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

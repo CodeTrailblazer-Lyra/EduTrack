@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.lukix.edutrack.repository.EnrollmentRepository">
+
+    <resultMap id="EnrollmentResultMap" type="xyz.lukix.edutrack.entity.Enrollment">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="score" column="score"/>
+        <result property="semester" column="semester"/>
+        <result property="passed" column="passed"/>
+        <result property="enrolledAt" column="enrolled_at"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="EnrollmentResultMap">
+        SELECT * FROM enrollment WHERE deleted = 0
+    </select>
+
+    <select id="findById" resultMap="EnrollmentResultMap" parameterType="long">
+        SELECT * FROM enrollment WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="xyz.lukix.edutrack.entity.Enrollment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO enrollment(student_id, course_id, score, semester, passed, enrolled_at) 
+        VALUES(#{studentId}, #{courseId}, #{score}, #{semester}, #{passed}, #{enrolledAt})
+    </insert>
+
+    <update id="update" parameterType="xyz.lukix.edutrack.entity.Enrollment">
+        UPDATE enrollment SET student_id = #{studentId}, course_id = #{courseId}, score = #{score}, 
+        semester = #{semester}, passed = #{passed}, enrolled_at = #{enrolledAt} WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById" parameterType="long">
+        UPDATE enrollment SET deleted = 1 WHERE id = #{id}
+    </update>
+
+    <select id="existsByStudentIdAndCourseId" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM enrollment WHERE student_id = #{studentId} AND course_id = #{courseId} AND deleted = 0
+    </select>
+
+    <select id="findByStudentId" resultMap="EnrollmentResultMap" parameterType="long">
+        SELECT * FROM enrollment WHERE student_id = #{studentId} AND deleted = 0
+    </select>
+
+    <select id="findByCourseId" resultMap="EnrollmentResultMap" parameterType="long">
+        SELECT * FROM enrollment WHERE course_id = #{courseId} AND deleted = 0
+    </select>
+
+    <select id="existsById" resultType="boolean" parameterType="long">
+        SELECT COUNT(*) > 0 FROM enrollment WHERE id = #{id} AND deleted = 0
+    </select>
+
+</mapper>

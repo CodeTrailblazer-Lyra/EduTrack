@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import xyz.lukix.edutrack.entity.Student;
 import xyz.lukix.edutrack.dto.StudentDTO;
+import xyz.lukix.edutrack.entity.Student;
 import xyz.lukix.edutrack.service.StuService;
 import xyz.lukix.edutrack.util.ApiResponse;
 
@@ -53,7 +53,7 @@ public class StuController {
         if (student != null) {
             return ResponseEntity.ok(ApiResponse.success(student));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + escapeHtml(id.toString())));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + id.toString()));
         }
     }
     
@@ -68,13 +68,11 @@ public class StuController {
     })
     public ResponseEntity<ApiResponse<StudentDTO>> getStuByStuNum(
             @Parameter(description = "学生学号") @PathVariable("stuNum") String stuNum) {
-        // 路径变量现在通过过滤器自动清理，但仍保持显式清理以确保双重保护
-        String cleanStuNum = xyz.lukix.edutrack.util.XssCleaner.clean(stuNum);
-        StudentDTO student = stuService.getStuByStuNum(cleanStuNum);
+        StudentDTO student = stuService.getStuByStuNum(stuNum);
         if (student != null) {
             return ResponseEntity.ok(ApiResponse.success(student));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with student number: " + escapeHtml(cleanStuNum)));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with student number: " + stuNum));
         }
     }
 
@@ -90,14 +88,11 @@ public class StuController {
     })
     public ResponseEntity<ApiResponse<StudentDTO>> createStu(
             @RequestBody Student student) {
-        // 实体中的@PrePersist和@PreUpdate注解会自动清理，这里额外调用以确保安全
-        student.cleanXss();
-        
         try {
             StudentDTO createdStudent = stuService.createStu(student);
             return ResponseEntity.status(201).body(ApiResponse.success("Student created successfully", createdStudent));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
         }
     }
 
@@ -115,18 +110,15 @@ public class StuController {
     public ResponseEntity<ApiResponse<StudentDTO>> updateStu(
             @Parameter(description = "学生ID") @PathVariable("id") Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "学生信息") @RequestBody Student student) {
-        // 实体中的@PrePersist和@PreUpdate注解会自动清理，这里额外调用以确保安全
-        student.cleanXss();
-        
         try {
             StudentDTO updatedStudent = stuService.updateStu(id, student);
             if (updatedStudent != null) {
                 return ResponseEntity.ok(ApiResponse.success("Student updated successfully", updatedStudent));
             } else {
-                return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + escapeHtml(id.toString())));
+                return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + id.toString()));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.status(409).body(ApiResponse.conflict(escapeHtml(e.getMessage())));
+            return ResponseEntity.status(409).body(ApiResponse.conflict(e.getMessage()));
         }
     }
 
@@ -144,23 +136,7 @@ public class StuController {
             stuService.deleteStu(id);
             return ResponseEntity.ok(ApiResponse.success("Student deleted successfully"));
         } else {
-            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + escapeHtml(id.toString())));
+            return ResponseEntity.status(404).body(ApiResponse.notFound("Student not found with id: " + id.toString()));
         }
-    }
-    
-    /**
-     * HTML转义函数，防止XSS攻击
-     * @param value 需要转义的字符串
-     * @return 转义后的字符串
-     */
-    private String escapeHtml(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#x27;");
     }
 }

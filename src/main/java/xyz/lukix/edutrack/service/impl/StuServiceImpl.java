@@ -1,8 +1,8 @@
 package xyz.lukix.edutrack.service.impl;
 
 import org.springframework.stereotype.Service;
-import xyz.lukix.edutrack.entity.Student;
 import xyz.lukix.edutrack.dto.StudentDTO;
+import xyz.lukix.edutrack.entity.Student;
 import xyz.lukix.edutrack.repository.StudentRepository;
 import xyz.lukix.edutrack.service.StuService;
 
@@ -38,8 +38,8 @@ public class StuServiceImpl implements StuService {
             studentRepository.existsByStuNum(student.getStuNum())) {
             throw new RuntimeException("学号已存在: " + student.getStuNum());
         }
-        Student savedStudent = studentRepository.save(student);
-        return convertToDTO(savedStudent);
+        studentRepository.insert(student);
+        return convertToDTO(student);
     }
 
     @Override
@@ -52,8 +52,8 @@ public class StuServiceImpl implements StuService {
             }
             
             student.setId(id);
-            Student savedStudent = studentRepository.save(student);
-            return convertToDTO(savedStudent);
+            studentRepository.update(student);
+            return convertToDTO(student);
         }
         return null;
     }

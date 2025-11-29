@@ -1,8 +1,8 @@
 package xyz.lukix.edutrack.service.impl;
 
 import org.springframework.stereotype.Service;
-import xyz.lukix.edutrack.entity.Teacher;
 import xyz.lukix.edutrack.dto.TeacherDTO;
+import xyz.lukix.edutrack.entity.Teacher;
 import xyz.lukix.edutrack.repository.TeacherRepository;
 import xyz.lukix.edutrack.service.TeacherService;
 
@@ -38,8 +38,8 @@ public class TeacherServiceImpl implements TeacherService {
             teacherRepository.existsByTeachNum(teacher.getTeachNum())) {
             throw new RuntimeException("教职工号已存在: " + teacher.getTeachNum());
         }
-        Teacher savedTeacher = teacherRepository.save(teacher);
-        return convertToDTO(savedTeacher);
+        teacherRepository.insert(teacher);
+        return convertToDTO(teacher);
     }
 
     @Override
@@ -52,8 +52,8 @@ public class TeacherServiceImpl implements TeacherService {
             }
             
             teacher.setId(id);
-            Teacher savedTeacher = teacherRepository.save(teacher);
-            return convertToDTO(savedTeacher);
+            teacherRepository.update(teacher);
+            return convertToDTO(teacher);
         }
         return null;
     }

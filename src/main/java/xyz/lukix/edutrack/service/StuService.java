@@ -1,7 +1,7 @@
 package xyz.lukix.edutrack.service;
 
-import xyz.lukix.edutrack.entity.Student;
 import xyz.lukix.edutrack.dto.StudentDTO;
+import xyz.lukix.edutrack.entity.Student;
 
 import java.util.List;
 

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.lukix.edutrack.repository.TeacherRepository">
+
+    <resultMap id="TeacherResultMap" type="xyz.lukix.edutrack.entity.Teacher">
+        <id property="id" column="id"/>
+        <result property="teachNum" column="teach_num"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="TeacherResultMap">
+        SELECT * FROM teacher WHERE deleted = 0
+    </select>
+
+    <select id="findById" resultMap="TeacherResultMap" parameterType="long">
+        SELECT * FROM teacher WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="xyz.lukix.edutrack.entity.Teacher" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO teacher(teach_num, name) VALUES(#{teachNum}, #{name})
+    </insert>
+
+    <update id="update" parameterType="xyz.lukix.edutrack.entity.Teacher">
+        UPDATE teacher SET teach_num = #{teachNum}, name = #{name} WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById" parameterType="long">
+        UPDATE teacher SET deleted = 1 WHERE id = #{id}
+    </update>
+
+    <select id="existsByTeachNum" resultType="boolean" parameterType="string">
+        SELECT COUNT(*) > 0 FROM teacher WHERE teach_num = #{teachNum} AND deleted = 0
+    </select>
+
+    <select id="existsByTeachNumAndIdNot" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM teacher WHERE teach_num = #{teachNum} AND id != #{id} AND deleted = 0
+    </select>
+
+    <select id="findByTeachNum" resultMap="TeacherResultMap" parameterType="string">
+        SELECT * FROM teacher WHERE teach_num = #{teachNum} AND deleted = 0
+    </select>
+
+    <select id="existsById" resultType="boolean" parameterType="long">
+        SELECT COUNT(*) > 0 FROM teacher WHERE id = #{id} AND deleted = 0
+    </select>
+
+</mapper>
